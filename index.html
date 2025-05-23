@@ -1,70 +1,48 @@
-const source = new EventSource("/events");
-
-source.addEventListener('gyro_readings', function(e) {
-  var obj = JSON.parse(e.data);
-  document.getElementById("gyroX").innerHTML = obj.gyroX;
-  document.getElementById("gyroY").innerHTML = obj.gyroY;
-  document.getElementById("gyroZ").innerHTML = obj.gyroZ;
-
-  cube.rotation.x = obj.gyroY;
-  cube.rotation.z = obj.gyroX;
-  cube.rotation.y = obj.gyroZ;
-  renderer.render(scene, camera);
-
-  setLED("ledX", obj.ledX);
-  setLED("ledY", obj.ledY);
-  setLED("ledZ", obj.ledZ);
-}, false);
-
-source.addEventListener('acc_readings', function(e) {
-  var obj = JSON.parse(e.data);
-  document.getElementById("accX").innerHTML = obj.accX;
-  document.getElementById("accY").innerHTML = obj.accY;
-  document.getElementById("accZ").innerHTML = obj.accZ;
-}, false);
-
-source.addEventListener('temp_reading', function(e) {
-  document.getElementById("temp").innerHTML = e.data;
-}, false);
-
-function setLED(id, status) {
-  const led = document.getElementById(id);
-  if (status === "ON") {
-    led.textContent = "ON";
-    led.classList.add("led-on");
-    led.classList.remove("led-off");
-  } else {
-    led.textContent = "OFF";
-    led.classList.add("led-off");
-    led.classList.remove("led-on");
-  }
-}
-
-// 3D CUBE SETUP
-let scene = new THREE.Scene();
-let camera = new THREE.PerspectiveCamera(75, 300 / 300, 0.1, 1000);
-let renderer = new THREE.WebGLRenderer();
-renderer.setSize(300, 300);
-document.getElementById("3Dcube").appendChild(renderer.domElement);
-
-let geometry = new THREE.BoxGeometry();
-let material = new THREE.MeshNormalMaterial();
-let cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
-
-camera.position.z = 2;
-renderer.render(scene, camera);
-
-function resetPosition(button) {
-  const id = button.id;
-  if (id === "reset") {
-    cube.rotation.set(0, 0, 0);
-  } else if (id === "resetX") {
-    cube.rotation.x = 0;
-  } else if (id === "resetY") {
-    cube.rotation.y = 0;
-  } else if (id === "resetZ") {
-    cube.rotation.z = 0;
-  }
-  renderer.render(scene, camera);
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MPU6050 Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/107/three.min.js"></script>
+</head>
+<body>
+  <div class="topnav">
+    <h1><i class="far fa-compass"></i> MPU6050 <i class="far fa-compass"></i></h1>
+  </div>
+  <div class="content">
+    <div class="cards">
+      <div class="card">
+        <p class="card-title">GYROSCOPE</p>
+        <p><span class="reading">X: <span id="gyroX"></span> rad</span></p>
+        <p><span class="reading">Y: <span id="gyroY"></span> rad</span></p>
+        <p><span class="reading">Z: <span id="gyroZ"></span> rad</span></p>
+        <p><span class="reading">LED Status</span></p>
+        <p>X: <span id="ledX" class="led-indicator">OFF</span></p>
+        <p>Y: <span id="ledY" class="led-indicator">OFF</span></p>
+        <p>Z: <span id="ledZ" class="led-indicator">OFF</span></p>
+      </div>
+      <div class="card">
+        <p class="card-title">ACCELEROMETER</p>
+        <p><span class="reading">X: <span id="accX"></span> ms<sup>2</sup></span></p>
+        <p><span class="reading">Y: <span id="accY"></span> ms<sup>2</sup></span></p>
+        <p><span class="reading">Z: <span id="accZ"></span> ms<sup>2</sup></span></p>
+      </div>
+      <div class="card">
+        <p class="card-title">TEMPERATURE</p>
+        <p><span class="reading"><span id="temp"></span> &deg;C</span></p>
+        <p class="card-title">3D ANIMATION</p>
+        <button id="reset" onclick="resetPosition(this)">RESET POSITION</button>
+        <button id="resetX" onclick="resetPosition(this)">X</button>
+        <button id="resetY" onclick="resetPosition(this)">Y</button>
+        <button id="resetZ" onclick="resetPosition(this)">Z</button>
+      </div>
+    </div>
+    <div class="cube-content">
+      <div id="3Dcube"></div>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
